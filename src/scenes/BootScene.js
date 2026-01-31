@@ -1,45 +1,44 @@
 import Phaser from 'phaser';
-import { getAssetLoadQueue, getTotalAssetCount } from '../config/assetManifest';
+import { getAssetLoadQueue } from '../config/assetManifest';
+import { COLORS, TEXT_SIZES, PROGRESS_BAR } from '../config/constants';
 
 class BootScene extends Phaser.Scene {
   constructor() {
     super({ key: 'BootScene' });
   }
 
-  preload() {
-    this.cameras.main.setBackgroundColor('#1a4d2e');
+  preload() {COLORS.dark);
 
     const { width, height } = this.scale;
     const loadingText = this.add.text(width / 2, height / 2 - 20, 'Loading...', {
       fontFamily: 'Arial, sans-serif',
-      fontSize: '24px',
+      fontSize: TEXT_SIZES.body,
       color: '#ffffff'
     }).setOrigin(0.5);
 
     const progressBar = this.add.rectangle(
       width / 2,
       height / 2 + 20,
-      300,
-      20,
-      0x333333
+      PROGRESS_BAR.width,
+      PROGRESS_BAR.height,
+      PROGRESS_BAR.bgColor
     );
     const progressFill = this.add.rectangle(
-      width / 2 - 150,
+      width / 2 - PROGRESS_BAR.offsetX,
       height / 2 + 20,
       0,
-      20,
-      0x4caf50
+      PROGRESS_BAR.height,
+      PROGRESS_BAR.fillColor
     ).setOrigin(0, 0.5);
 
     const progressText = this.add.text(width / 2, height / 2 + 50, '0%', {
       fontFamily: 'Arial, sans-serif',
-      fontSize: '16px',
-      color: '#d8f3dc'
+      fontSize: TEXT_SIZES.small,
+      color: COLORS.light
     }).setOrigin(0.5);
 
     // Load assets from manifest
     const assetQueue = getAssetLoadQueue();
-    const totalAssets = getTotalAssetCount();
 
     assetQueue.forEach((asset) => {
       const { key, type, path } = asset;
@@ -55,8 +54,19 @@ class BootScene extends Phaser.Scene {
 
     // Update progress display
     this.load.on('progress', (progress) => {
-      const barWidth = 300 * progress;
+      const barWidth = PROGRESS_BAR.width * progress;
       progressFill.width = barWidth;
+      progressText.setText(`${Math.round(progress * 100)}%`);
+    });
+
+    // Handle load errors
+    this.load.on('filefailed', (file) => {
+      console.warn(`Failed to load: ${file.key} (${file.src})`);
+    });
+
+    this.load.on('loaderror', () => {
+      loadingText.setText('Load failed! Check console.');
+      console.error('Asset loading failed'
       progressText.setText(`${Math.round(progress * 100)}%`);
     });
 
