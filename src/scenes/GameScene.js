@@ -140,7 +140,12 @@ class GameScene extends Phaser.Scene {
     // Collide player/guests with environment obstacles
     if (this.environmentObstacles) {
       this.physics.add.collider(this.player.sprite, this.environmentObstacles);
-      this.physics.add.collider(this.guestGroup, this.environmentObstacles);
+      this.physics.add.collider(this.guestGroup, this.environmentObstacles, (guestBody) => {
+        if (guestBody?.owner?.onCollision) {
+          // Treat obstacle collision as a wall hit
+          guestBody.owner.onCollision(null);
+        }
+      });
     }
 
     const uiX = this.uiPanel.centerX;
@@ -284,14 +289,14 @@ class GameScene extends Phaser.Scene {
 
     const obstacles = [
       // Ballroom
-      { x: areaWidth * 0.5, y: height * 0.35, w: 120, h: 40 },
+      { x: areaWidth * 0.5, y: height * 0.35, w: 80, h: 40 },
       { x: areaWidth * 0.5, y: height * 0.7, w: 80, h: 80 },
       // Banquet Room
-      { x: areaWidth * 1.5, y: height * 0.3, w: 160, h: 40 },
-      { x: areaWidth * 1.5, y: height * 0.65, w: 180, h: 40 },
+      { x: areaWidth * 1.5, y: height * 0.22, w: 40, h: 140 },
+      { x: areaWidth * 1.5, y: height * 0.78, w: 40, h: 160 },
       // Garden
       { x: areaWidth * 2.5, y: height * 0.4, w: 90, h: 90 },
-      { x: areaWidth * 2.5, y: height * 0.75, w: 140, h: 40 }
+      { x: areaWidth * 2.5, y: height * 0.75, w: 90, h: 40 }
     ];
 
     // Divider walls with door gaps between areas
