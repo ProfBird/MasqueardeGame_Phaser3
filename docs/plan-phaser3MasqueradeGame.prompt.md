@@ -60,34 +60,34 @@
 - Implement WASD/Arrow key movement with configurable speed ✅
 - Add collision detection with world bounds, furniture, NPCs ✅
 - Create interaction radius/zone (e.g., 50-pixel circle) ✅
-- Implement interaction key binding (E or Space)
+- Implement interaction key binding (E or Space) ✅
 
 ### 3.2 Player Animations & Visual
-- Implement idle wobble animation (subtle rotation/scale) using placeholder
-- Add directional facing when moving
-- Create interaction highlight visual feedback (colored glow)
+- Implement idle wobble animation (subtle rotation/scale) using placeholder ✅
+- Add directional facing when moving ✅
+- Create interaction highlight visual feedback (colored glow) ✅
 
 ---
 
 ## Phase 4: NPC Guest System
 
 ### 4.1 Guest Entity & Randomization with Placeholders
-- Create `Guest` class with properties:
+- Create `NonPlayerGuest` class with properties:
   - `bodyType` (1 of 3-4 body variants)
   - `headType` (1 of 5+ head variants with distinct features)
   - `maskType` (1 of 3-4 mask designs)
   - `isThief` boolean
   - `currentState` (wander, idle, socialize)
 - Implement randomization system that assigns unique combinations
-- Use colored rectangles with labels (placeholder graphics) for each guest
-- Gate placeholder graphics behind feature flags (see `FEATURE_FLAGS.enablePlaceholderGraphics`)
+- Use colored rectangles with labels (placeholder graphics) for each guest ✅
+- Gate placeholder graphics behind feature flags (see `FEATURE_FLAGS.enablePlaceholderGraphics`) ✅
 - Store facial features for clue matching
 
 ### 4.2 Guest Behavior AI
-- **Wander state:** Select random navigable point, move toward it
-- **Idle state:** Stand still for 3-5 seconds (randomized), play wobble animation
+- **Wander state:** Select random navigable point, move toward it ✅
+- **Idle state:** Stand still for 3-5 seconds (randomized), play wobble animation ✅
 - **Socialize state:** On collision with another guest, face each other briefly (1-2 sec)
-- Implement state transitions with timers
+- Implement state transitions with timers ✅
 - Add simple pathfinding or direct movement with obstacle avoidance
 
 ### 4.3 Unmask Interaction
@@ -96,16 +96,13 @@
   2. Mask lifts/becomes transparent
   3. Face revealed with surprised expression (color change or indicator)
   4. Mask returns to position
-- Lock player input during animation
-- Emit events for UI to show "Press [Key] to Accuse" prompt
-- Track which guest is currently unmasked
 
 ---
 
 ## Phase 5: Environment & Collision
 
 ### 5.1 Tilemap & Environment with Placeholders
-- Create 2D top-down tilemap for ballroom/garden using placeholder tiles
+- Create 2D top-down tilemap with three areas (ballroom, banquet room, garden) using placeholder tiles
 - Place furniture obstacles (placeholder rectangles) at strategic points
 - Define collision layers for walls, furniture, NPCs
 - Set world bounds for player and NPCs
@@ -141,14 +138,14 @@
 ## Phase 7: User Interface Polish
 
 ### 7.1 HUD Elements Refinement
-- **Clue Display:** Top-left or bottom-left text box showing thief's facial feature (immutable)
-- **Countdown Timer:** Top-center large display (MM:SS format), configurable duration (settings file)
+- **Clue Display:** Top-left or bottom-left text box showing thief's facial feature (immutable) ✅
+- **Countdown Timer:** Top-center large display (MM:SS format), configurable duration (settings file) ✅
 - **Interaction Highlight:** Visual ring/glow around nearby guest when in range
 - **Interaction Prompt:** "Press [E] to Unmask" text when player is near guest
 - **Accusation Prompt:** "Press [Q] to Accuse!" shown ONLY during unmask window
 
 ### 7.2 Menu & End Screens
-- Main menu with "Play" button and brief instructions overlay
+- Main menu with "Play" button and brief instructions overlay ✅
 - End screen variants:
   - Victory: "You caught the thief!" + thief sprite + restart button
   - Defeat (wrong): "Wrong person! The real thief escaped." + thief sprite

@@ -28,6 +28,21 @@ class GameScene extends Phaser.Scene {
 
     const { width, height } = this.scale;
 
+    const uiPanelWidth = 220;
+    const gameWidth = width - uiPanelWidth;
+    this.uiPanel = {
+      x: gameWidth,
+      width: uiPanelWidth,
+      centerX: gameWidth + uiPanelWidth / 2
+    };
+
+    this.physics.world.setBounds(0, 0, gameWidth, height);
+
+    this.createEnvironment(gameWidth, height);
+
+    // UI panel background
+    this.add.rectangle(this.uiPanel.centerX, height / 2, uiPanelWidth, height, 0x1b4d2e, 1);
+
     this.gameState = new GameState();
     
     // Spawn guests
@@ -53,7 +68,6 @@ class GameScene extends Phaser.Scene {
       this.events.on('update', () => {
         debugGraphics.clear();
         debugGraphics.fillStyle(0x00ff00, 0.3);
-      returnScene: this.sys.settings.key
         if (this.player && this.player.body) {
           debugGraphics.fillRect(
             this.player.body.x,
@@ -123,37 +137,47 @@ class GameScene extends Phaser.Scene {
       }
     });
 
-    this.add.text(width / 2, height / 2 - 40, 'Gameplay Scene', {
+    // Collide player/guests with environment obstacles
+    if (this.environmentObstacles) {
+      this.physics.add.collider(this.player.sprite, this.environmentObstacles);
+      this.physics.add.collider(this.guestGroup, this.environmentObstacles);
+    }
+
+    const uiX = this.uiPanel.centerX;
+    const uiStartY = 80;
+    const uiLine = 32;
+
+    this.add.text(uiX, uiStartY, 'Gameplay', {
       fontFamily: 'Arial, sans-serif',
       fontSize: TEXT_SIZES.heading,
       color: '#ffffff'
     }).setOrigin(0.5);
 
-    this.clueText = this.add.text(width / 2, height / 2, 'Clue: ...', {
+    this.clueText = this.add.text(uiX, uiStartY + uiLine * 2, 'Clue: ...', {
       fontFamily: 'Arial, sans-serif',
       fontSize: TEXT_SIZES.body,
       color: COLORS.light
     }).setOrigin(0.5);
 
-    this.timerText = this.add.text(width / 2, height / 2 + 30, 'Time: 02:00', {
+    this.timerText = this.add.text(uiX, uiStartY + uiLine * 3, 'Time: 02:00', {
       fontFamily: 'Arial, sans-serif',
       fontSize: TEXT_SIZES.body,
       color: COLORS.light
     }).setOrigin(0.5);
 
-    this.interactionText = this.add.text(width / 2, height / 2 + 55, `Interact: ${KEYS.interact} or Space`, {
+    this.interactionText = this.add.text(uiX, uiStartY + uiLine * 4.3, `Interact: ${KEYS.interact} or Space`, {
       fontFamily: 'Arial, sans-serif',
       fontSize: TEXT_SIZES.small,
       color: COLORS.lighter
     }).setOrigin(0.5);
 
-    this.add.text(width / 2, height / 2 + 85, 'Press ESC to return to Menu', {
+    this.add.text(uiX, uiStartY + uiLine * 6, 'Press ESC to return to Menu', {
       fontFamily: 'Arial, sans-serif',
       fontSize: TEXT_SIZES.small,
       color: COLORS.light
     }).setOrigin(0.5);
 
-    this.add.text(width / 2, height / 2 + 110, 'Press END to view End Scene', {
+    this.add.text(uiX, uiStartY + uiLine * 7.2, 'Press END to view End Scene', {
       fontFamily: 'Arial, sans-serif',
       fontSize: TEXT_SIZES.hint,
       color: COLORS.lighter
@@ -226,6 +250,90 @@ class GameScene extends Phaser.Scene {
     // Cleanup when scene stops
     this.events.on('sleep', () => this.cleanup());
     this.events.on('shutdown', () => this.cleanup());
+  }
+
+  createEnvironment(width, height) {
+    const areaWidth = width / 3;
+
+    // Floor areas
+    this.add.rectangle(areaWidth * 0.5, height / 2, areaWidth, height, 0x2b6a46, 1);
+    this.add.rectangle(areaWidth * 1.5, height / 2, areaWidth, height, 0x3b7a4a, 1);
+    this.add.rectangle(areaWidth * 2.5, height / 2, areaWidth, height, 0x2d5f3a, 1);
+
+    // Area labels
+    this.add.text(areaWidth * 0.5, 24, 'Ballroom', {
+      fontFamily: 'Arial, sans-serif',
+      fontSize: TEXT_SIZES.hint,
+      color: COLORS.lighter
+    }).setOrigin(0.5);
+
+    this.add.text(areaWidth * 1.5, 24, 'Banquet Room', {
+      fontFamily: 'Arial, sans-serif',
+      fontSize: TEXT_SIZES.hint,
+      color: COLORS.lighter
+    }).setOrigin(0.5);
+
+    this.add.text(areaWidth * 2.5, 24, 'Garden', {
+      fontFamily: 'Arial, sans-serif',
+      fontSize: TEXT_SIZES.hint,
+      color: COLORS.lighter
+    }).setOrigin(0.5);
+
+    // Obstacles (placeholder rectangles)
+    this.environmentObstacles = this.physics.add.staticGroup();
+
+    const obstacles = [
+      // Ballroom
+      { x: areaWidth * 0.5, y: height * 0.35, w: 120, h: 40 },
+      { x: areaWidth * 0.5, y: height * 0.7, w: 80, h: 80 },
+      // Banquet Room
+      { x: areaWidth * 1.5, y: height * 0.3, w: 160, h: 40 },
+      { x: areaWidth * 1.5, y: height * 0.65, w: 180, h: 40 },
+      // Garden
+      { x: areaWidth * 2.5, y: height * 0.4, w: 90, h: 90 },
+      { x: areaWidth * 2.5, y: height * 0.75, w: 140, h: 40 }
+    ];
+
+    // Divider walls with door gaps between areas
+    const wallThickness = 12;
+    const gapHeight = 140;
+    const gapY = height * 0.55;
+    const gapHalf = gapHeight / 2;
+    const dividerXs = [areaWidth, areaWidth * 2];
+
+    dividerXs.forEach((dividerX) => {
+      const topHeight = Math.max(0, gapY - gapHalf);
+      const bottomHeight = Math.max(0, height - (gapY + gapHalf));
+
+      if (topHeight > 0) {
+        obstacles.push({
+          x: dividerX,
+          y: topHeight / 2,
+          w: wallThickness,
+          h: topHeight
+        });
+      }
+
+      if (bottomHeight > 0) {
+        obstacles.push({
+          x: dividerX,
+          y: gapY + gapHalf + bottomHeight / 2,
+          w: wallThickness,
+          h: bottomHeight
+        });
+      }
+    });
+
+    obstacles.forEach((item) => {
+      const rect = this.add.rectangle(item.x, item.y, item.w, item.h, 0x1f4d31, 1);
+      this.environmentObstacles.add(rect);
+      rect.body.setSize(item.w, item.h);
+      rect.body.setOffset(-item.w / 2, -item.h / 2);
+      rect.body.updateFromGameObject();
+      if (rect.body.refreshBody) {
+        rect.body.refreshBody();
+      }
+    });
   }
   
   setupDebugAPI() {

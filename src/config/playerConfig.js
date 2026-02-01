@@ -3,7 +3,7 @@
  */
 
 export const PLAYER_CONFIG = {
-  x: 400, // Default spawn x
+  x: 300, // Default spawn x
   y: 300, // Default spawn y
   speed: 150, // Pixels per second
   interactionRadius: 80, // Distance to interact with NPCs
