@@ -91,3 +91,19 @@ This is the core interaction loop. The player cannot see a guest's face until th
 * **Environment:**
     * Floor tile (seamless parquet or marble).
     * Obstacles (Tables, plants, fountains).
+
+---
+
+## 7. Implementation Notes (Phaser)
+### 7.1. Physics & Collision
+* Arcade Physics body `x/y` are **top-left**; use `body.center` for distance/proximity checks.
+* `overlap()` only detects contact; it does **not** resolve penetration. `collider()` resolves penetration.
+* If using proximity-based collision, compute using **combined radii** from body sizes and body centers.
+
+### 7.2. Debug & Feature Flags
+* Debug tooling (physics overlays, console API) is gated by `NODE_ENV !== 'production'`.
+* Placeholder graphics are feature-flagged (see `FEATURE_FLAGS.enablePlaceholderGraphics`).
+
+### 7.3. Current Collision Approach
+* Player↔Guest uses overlap + manual separation + proximity blocking.
+* Proximity and overlap use body centers + combined radii for consistent calculations.

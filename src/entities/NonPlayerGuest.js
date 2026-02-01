@@ -55,13 +55,17 @@ class NonPlayerGuest extends Guest {
     this.sprite.setOrigin(0.5, 0.5); // Center the sprite
     this.trackSprite(this.sprite);
 
-    // Add physics with proper offset for head/body composition
+    // Add physics with proper offset for head/body composition.
+    // NOTE: Physics body is offset upward (negative Y) because the visual guest sprite
+    // includes a head above the body. The collision box only covers the body portion,
+    // preventing unrealistic collision with the head area. This ensures proximity checks
+    // and collision calculations are based on the actual body-to-body contact zone.
     this.addPhysics(this.sprite, {
       width: GUEST_PHYSICS.width,
       height: GUEST_PHYSICS.height,
       offsetY: GUEST_PHYSICS.offsetY,
       isImmovable: false, // Can be stopped by collisions
-      isPushable: false,  // Cannot be pushed
+      isPushable: false,  // Cannot be pushed by player or other guests. Guests handle their own movement via AI and resolve collisions through onCollision() logic, not physics velocity transfer.
       collideWorldBounds: true
     });
 
@@ -154,12 +158,14 @@ class NonPlayerGuest extends Guest {
     this.isStunned = true;
     this.stunTimer = 2000; // 2 seconds
 
-    // Calculate bounce direction
-    // If other is undefined (wall), just reverse later.
-    // If other exists, move away from it.
+    // Calculate bounce direction away from the collision source.
+    // This creates organic avoidance behavior: guests don't simply freeze,
+    // they actively stun (pause), then pick a destination away from the obstacle.
+    // If other is undefined (wall collision), just pick a random new destination.
+    // If other exists (guest-to-guest collision), calculate angle between them and flee.
     if (other && other.x !== undefined && other.y !== undefined) {
       const angle = Phaser.Math.Angle.Between(other.x, other.y, this.x, this.y);
-      // Project new destination 100px away in that angle
+      // Project new destination 100px away in that angle to ensure clear escape
       this.destinationX = this.x + Math.cos(angle) * 100;
       this.destinationY = this.y + Math.sin(angle) * 100;
     } else {
@@ -191,9 +197,14 @@ class NonPlayerGuest extends Guest {
       return; // Don't move while unmasking
     }
 
+    // Accumulate waddle time for animation sine wave.
+    // Scaled by 0.01 so waddleTime increments slowly (~1 per 100ms),
+    // creating smooth oscillation when passed to Math.sin() for rotation.
     this.waddleTime += deltaTime * 0.01;
 
-    // Sync position from physics body
+    // Sync position from physics body after movement calculations.
+    // The physics engine moves this.sprite, so we update this.x/this.y to stay in sync.
+    // This ensures all child graphics (head, eyes, mask) get updated correctly in updatePositions().
     this.x = this.sprite.x;
     this.y = this.sprite.y;
 
@@ -221,7 +232,9 @@ class NonPlayerGuest extends Guest {
       const distX = this.destinationX - this.x;
       const distY = this.destinationY - this.y;
       const distance = Math.hypot(distX, distY);
-      const stopDistance = 15; // Stop before reaching destination
+      // Use stopDistance threshold (15px) to prevent guests from oscillating around exact destination.
+      // Without this, guests with continuous velocity correction would jitter endlessly.
+      const stopDistance = 15;
 
       if (distance < stopDistance) {
         // Reached destination, start idling

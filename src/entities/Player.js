@@ -99,6 +99,9 @@ class Player extends Guest {
     // Check for nearby obstacles before processing input
     let blockedDirections = { up: false, down: false, left: false, right: false };
     
+    // NOTE: We use proximity (body centers + combined radii) instead of overlap.
+    // Overlap only detects contact; it doesn't prevent tunneling. This blocks
+    // movement into guests while still allowing movement away.
     if (this.scene.guestGroup && isPressingKeys) {
       for (const body of this.scene.guestGroup.children.entries) {
         if (!body.body || !this.body) continue;
@@ -125,7 +128,8 @@ class Player extends Guest {
             if (dirX < -0.5) blockedDirections.left = true;
             if (dirX > 0.5) blockedDirections.right = true;
             
-            // If overlapping, nudge player away from the guest
+            // If overlapping, nudge player away from the guest.
+            // We only push the player to avoid "pushing" NPCs.
             const overlap = combinedRadius - distance;
             if (overlap > 0) {
               const awayX = -dirX;
@@ -202,7 +206,7 @@ class Player extends Guest {
   }
 
   updateIdleWobble(isMoving) {
-    if (isMoving) {
+    if (!isMoving) {
       this.sprite.setRotation(0);
       this.sprite.setScale(1, 1);
       this.arrow.setScale(1, 1);

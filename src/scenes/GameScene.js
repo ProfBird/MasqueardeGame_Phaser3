@@ -86,6 +86,7 @@ class GameScene extends Phaser.Scene {
     });
 
     // Player overlaps with guests (manual equal separation)
+    // We keep this to avoid Arcade's default push while still detecting contact.
     this.physics.add.overlap(this.guestGroup, this.player.sprite, (guestBody, playerBody) => {
       
       // Call collision handlers on both

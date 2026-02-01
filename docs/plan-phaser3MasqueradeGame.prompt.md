@@ -2,7 +2,7 @@
 
 **Project:** Top-down social deduction detective game at a solarpunk masquerade
 **Tech Stack:** Phaser 3, Webpack, JavaScript
-**Requirements:** See [GameRequirements.md](../GameRequirements.md)
+**Requirements:** See [GameRequirements.md](./GameRequirements.md)
 
 ---
 
@@ -56,6 +56,7 @@
 ### 3.1 Player Entity with Placeholder Graphics
 - Create `Player` class extending Phaser sprite
 - Use colored rectangle (placeholder) for visual representation
+- Gate placeholder graphics behind feature flags (see `FEATURE_FLAGS.enablePlaceholderGraphics`)
 - Implement WASD/Arrow key movement with configurable speed
 - Add collision detection with world bounds, furniture, NPCs
 - Create interaction radius/zone (e.g., 50-pixel circle)
@@ -79,6 +80,7 @@
   - `currentState` (wander, idle, socialize)
 - Implement randomization system that assigns unique combinations
 - Use colored rectangles with labels (placeholder graphics) for each guest
+- Gate placeholder graphics behind feature flags (see `FEATURE_FLAGS.enablePlaceholderGraphics`)
 - Store facial features for clue matching
 
 ### 4.2 Guest Behavior AI
@@ -111,6 +113,7 @@
 ### 5.2 Basic Visual Layout
 - Use placeholder colors/rectangles for environment
 - Ensure collision detection works with placeholder obstacles
+- Prefer body center distance for proximity checks; combined radius from body sizes
 
 ---
 
