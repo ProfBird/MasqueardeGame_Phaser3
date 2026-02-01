@@ -7,7 +7,8 @@ class BootScene extends Phaser.Scene {
     super({ key: 'BootScene' });
   }
 
-  preload() {COLORS.dark);
+  preload() {
+    this.cameras.main.setBackgroundColor(COLORS.dark);
 
     const { width, height } = this.scale;
     const loadingText = this.add.text(width / 2, height / 2 - 20, 'Loading...', {
@@ -66,8 +67,7 @@ class BootScene extends Phaser.Scene {
 
     this.load.on('loaderror', () => {
       loadingText.setText('Load failed! Check console.');
-      console.error('Asset loading failed'
-      progressText.setText(`${Math.round(progress * 100)}%`);
+      console.error('Asset loading failed');
     });
 
     this.load.on('complete', () => {

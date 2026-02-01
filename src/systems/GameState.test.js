@@ -94,6 +94,24 @@ describe('GameState', () => {
       gameState.accuse(gameState.thiefId);
       expect(mockTimer.remove).toHaveBeenCalled();
     });
+
+    it('should do nothing when guestId is falsy', () => {
+      const winHandler = jest.fn();
+      const lossHandler = jest.fn();
+      const mockTimer = { remove: jest.fn() };
+      gameState._timerEvent = mockTimer;
+
+      gameState.on('win', winHandler);
+      gameState.on('loss', lossHandler);
+
+      gameState.accuse(null);
+      gameState.accuse(undefined);
+      gameState.accuse('');
+
+      expect(winHandler).not.toHaveBeenCalled();
+      expect(lossHandler).not.toHaveBeenCalled();
+      expect(mockTimer.remove).not.toHaveBeenCalled();
+    });
   });
 
   describe('stopTimer', () => {
@@ -178,6 +196,44 @@ describe('GameState', () => {
           loop: true
         })
       );
+    });
+
+    it('should remove existing timer before starting a new one', () => {
+      const existingTimer = { remove: jest.fn() };
+      gameState._timerEvent = existingTimer;
+
+      const mockScene = {
+        time: {
+          addEvent: jest.fn(() => ({
+            remove: jest.fn()
+          }))
+        }
+      };
+
+      gameState.startTimer(mockScene);
+      expect(existingTimer.remove).toHaveBeenCalledWith(false);
+    });
+
+    it('should emit timeout loss when timer reaches zero', () => {
+      const timeoutHandler = jest.fn();
+      let capturedCallback;
+
+      const mockScene = {
+        time: {
+          addEvent: jest.fn((config) => {
+            capturedCallback = config.callback;
+            return { remove: jest.fn() };
+          })
+        }
+      };
+
+      gameState.timerSeconds = 1;
+      gameState.on('loss', timeoutHandler);
+      gameState.startTimer(mockScene);
+
+      capturedCallback();
+
+      expect(timeoutHandler).toHaveBeenCalledWith({ reason: 'timeout' });
     });
   });
 });

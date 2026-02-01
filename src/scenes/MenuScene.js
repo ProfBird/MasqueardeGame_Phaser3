@@ -29,7 +29,7 @@ class MenuScene extends Phaser.Scene {
       color: COLORS.lighter
     }).setOrigin(0.5);
 
-    this.input.keyboard.on('keydown-ENTER', () => {
+    this.input.keyboard.once('keydown-ENTER', () => {
       this.scene.start('GameScene');
     });
   }

@@ -10,7 +10,8 @@ class EndScene extends Phaser.Scene {
     this.result = data?.result || 'Game Over';
   }
 
-  create() {COLORS.dark);
+  create() {
+    this.cameras.main.setBackgroundColor(COLORS.dark);
 
     const { width, height } = this.scale;
 
@@ -32,7 +33,6 @@ class EndScene extends Phaser.Scene {
       color: COLORS.lighter
     }).setOrigin(0.5);
 
-    this.input.keyboard.on
     this.input.keyboard.once('keydown-ENTER', () => {
       this.scene.start('MenuScene');
     });
