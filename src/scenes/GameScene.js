@@ -405,8 +405,11 @@ class GameScene extends Phaser.Scene {
         this.player.drawInteractionRadius(this.interactionDebugGraphics);
       }
     }
+    // Skip destroyed guests to avoid crashes during collision cleanup
     this.guests.forEach((guest) => {
-      guest.update(this.time.delta);
+      if (guest && guest.body && !guest.body.destroyed) {
+        guest.update(this.time.delta);
+      }
     });
   }
 

@@ -69,6 +69,8 @@ class NonPlayerGuest extends Guest {
       collideWorldBounds: true
     });
 
+    this.body = this.sprite.body;
+
     // Head (smiley) - positioned relative to body
     this.head = this.scene.add.circle(this.x, this.y - 12, 10, 0xffdb58, 1);
     this.head.setStrokeStyle(1, 0xffffff, 1);
@@ -192,8 +194,11 @@ class NonPlayerGuest extends Guest {
    * Update wandering behavior and waddle animation
    */
   update(deltaTime = 16) {
+    // Guard against destroyed body (can happen during collision cleanup)
+    if (!this.sprite?.body) return;
+
     if (this.isUnmasking) {
-      this.sprite.body.setVelocity(0, 0);
+      if (this.sprite?.body) this.sprite.body.setVelocity(0, 0);
       return; // Don't move while unmasking
     }
 
@@ -209,7 +214,7 @@ class NonPlayerGuest extends Guest {
     this.y = this.sprite.y;
 
     if (this.isStunned) {
-      this.sprite.body.setVelocity(0, 0);
+      if (this.sprite?.body) this.sprite.body.setVelocity(0, 0);
       this.stunTimer -= deltaTime;
       if (this.stunTimer <= 0) {
          this.isStunned = false; 
@@ -219,14 +224,14 @@ class NonPlayerGuest extends Guest {
     }
 
     if (this.isIdle) {
-      this.sprite.body.setVelocity(0, 0);
+      if (this.sprite?.body) this.sprite.body.setVelocity(0, 0);
       this.idleTimer -= deltaTime;
       if (this.idleTimer <= 0) {
         this.isIdle = false;
         this.pickNewDestination();
       }
       // Subtle wobble while idle
-      this.sprite.setRotation(Math.sin(this.waddleTime * 0.8) * 0.02);
+      if (this.sprite) this.sprite.setRotation(Math.sin(this.waddleTime * 0.8) * 0.02);
     } else {
       // Move toward destination
       const distX = this.destinationX - this.x;
@@ -240,15 +245,15 @@ class NonPlayerGuest extends Guest {
         // Reached destination, start idling
         this.isIdle = true;
         this.idleTimer = 3000 + Math.random() * 2000; // 3-5 seconds
-        this.sprite.body.setVelocity(0, 0);
+        if (this.sprite?.body) this.sprite.body.setVelocity(0, 0);
       } else {
         // Move toward destination
         const moveVelX = (distX / distance) * this.wanderSpeed;
         const moveVelY = (distY / distance) * this.wanderSpeed;
-        this.sprite.body.setVelocity(moveVelX, moveVelY);
+        if (this.sprite?.body) this.sprite.body.setVelocity(moveVelX, moveVelY);
 
         // Waddle animation (rotation while walking)
-        this.sprite.setRotation(Math.sin(this.waddleTime) * 0.05);
+        if (this.sprite) this.sprite.setRotation(Math.sin(this.waddleTime) * 0.05);
       }
     }
 
