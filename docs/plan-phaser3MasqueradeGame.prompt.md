@@ -54,12 +54,12 @@
 ## Phase 3: Player Character
 
 ### 3.1 Player Entity with Placeholder Graphics
-- Create `Player` class extending Phaser sprite
-- Use colored rectangle (placeholder) for visual representation
-- Gate placeholder graphics behind feature flags (see `FEATURE_FLAGS.enablePlaceholderGraphics`)
-- Implement WASD/Arrow key movement with configurable speed
-- Add collision detection with world bounds, furniture, NPCs
-- Create interaction radius/zone (e.g., 50-pixel circle)
+- Create `Player` class extending Phaser sprite ✅
+- Use colored rectangle (placeholder) for visual representation ✅
+- Gate placeholder graphics behind feature flags (see `FEATURE_FLAGS.enablePlaceholderGraphics`) ✅
+- Implement WASD/Arrow key movement with configurable speed ✅
+- Add collision detection with world bounds, furniture, NPCs ✅
+- Create interaction radius/zone (e.g., 50-pixel circle) ✅
 - Implement interaction key binding (E or Space)
 
 ### 3.2 Player Animations & Visual

@@ -3,7 +3,7 @@ import GameState from '../systems/GameState';
 import Player from '../entities/Player';
 import NonPlayerGuest from '../entities/NonPlayerGuest';
 import { FEATURE_FLAGS } from '../config/featureFlags';
-import { COLORS, TEXT_SIZES } from '../config/constants';
+import { COLORS, TEXT_SIZES, KEYS } from '../config/constants';
 import { PLAYER_CONFIG } from '../config/playerConfig';
 import { GUEST_CONFIG } from '../config/guestConfig';
 
@@ -53,7 +53,7 @@ class GameScene extends Phaser.Scene {
       this.events.on('update', () => {
         debugGraphics.clear();
         debugGraphics.fillStyle(0x00ff00, 0.3);
-        // Draw player body (Arcade Body x/y is top-left)
+      returnScene: this.sys.settings.key
         if (this.player && this.player.body) {
           debugGraphics.fillRect(
             this.player.body.x,
@@ -141,7 +141,7 @@ class GameScene extends Phaser.Scene {
       color: COLORS.light
     }).setOrigin(0.5);
 
-    this.interactionText = this.add.text(width / 2, height / 2 + 55, 'Interact: E or Space', {
+    this.interactionText = this.add.text(width / 2, height / 2 + 55, `Interact: ${KEYS.interact} or Space`, {
       fontFamily: 'Arial, sans-serif',
       fontSize: TEXT_SIZES.small,
       color: COLORS.lighter
@@ -171,6 +171,13 @@ class GameScene extends Phaser.Scene {
     // Bind game state event listeners
     this.gameState.on('clue', ({ clueFeature }) => {
       this.clueText.setText(`Clue: ${clueFeature}`);
+    });
+
+    this.events.on('guest-unmasked', ({ guestId }) => {
+      const guest = this.guests.find((entry) => entry.id === guestId);
+      if (guest) {
+        guest.unmask(400);
+      }
     });
 
     this.gameState.on('timer', (remainingSeconds) => {
@@ -210,17 +217,10 @@ class GameScene extends Phaser.Scene {
 
     // Interaction key bindings (E / Space)
     this.input.keyboard.on('keydown-E', () => {
-      this.interactionText.setText('Interact: E pressed');
-      this.showInteractionRadius = false;
-      this.interactionDebugGraphics.clear();
-      this.player.setInteractionHighlight(false);
-      this.guests.forEach((guest) => guest.removeHighlight());
+      this.handleInteraction();
     });
     this.input.keyboard.on('keydown-SPACE', () => {
-      this.interactionText.setText('Interact: Space pressed');
-      this.showInteractionRadius = true;
-      this.player.setInteractionHighlight(true);
-      this.highlightNearbyGuests();
+      this.handleInteraction();
     });
 
     // Cleanup when scene stops
@@ -429,6 +429,48 @@ class GameScene extends Phaser.Scene {
       } else {
         guest.removeHighlight();
       }
+    });
+  }
+
+  handleInteraction() {
+    if (!this.player) return;
+
+    const nearbyGuests = this.player.getNearbyNPCs(
+      this.guests.map((guest) => ({
+        id: guest.id,
+        x: guest.x,
+        y: guest.y
+      }))
+    );
+
+    if (!nearbyGuests.length) {
+      this.interactionText.setText('No guest nearby');
+      return;
+    }
+
+    const playerX = this.player.sprite?.x ?? this.player.x;
+    const playerY = this.player.sprite?.y ?? this.player.y;
+    const nearest = nearbyGuests
+      .map((guest) => {
+        const dx = guest.x - playerX;
+        const dy = guest.y - playerY;
+        return { ...guest, distance: Math.hypot(dx, dy) };
+      })
+      .sort((a, b) => a.distance - b.distance)[0];
+
+    const fullGuest = this.guests.find((guest) => guest.id === nearest.id);
+    if (!fullGuest) {
+      this.interactionText.setText('Guest not found');
+      return;
+    }
+
+    this.interactionText.setText(`Interrogating ${nearest.id}...`);
+    this.scene.pause();
+    this.scene.launch('InterrogationScene', {
+      guestId: fullGuest.id,
+      guestVariant: fullGuest.variant,
+      clueFeature: this.gameState.clueFeature,
+      returnScene: this.sys.settings.key
     });
   }
 

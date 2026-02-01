@@ -1,6 +1,7 @@
 import BootScene from '../scenes/BootScene';
 import MenuScene from '../scenes/MenuScene';
 import GameScene from '../scenes/GameScene';
+import InterrogationScene from '../scenes/InterrogationScene';
 import EndScene from '../scenes/EndScene';
 
 /**
@@ -24,6 +25,7 @@ const gameConfig = {
     BootScene,
     MenuScene,
     GameScene,
+    InterrogationScene,
     EndScene
   ]
 };
